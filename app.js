@@ -2,7 +2,7 @@ document.querySelector('.btn.btn-primary').addEventListener('click',bracketRemov
 document.querySelector('.btn.btn-success').addEventListener('click', sr);
 document.querySelector('.btn.btn-warning').addEventListener('click', toolSr);
 document.querySelector('.btn.btn-info').addEventListener('click', tool);
-document.querySelector('.btn.btn-dark').addEventListener('click', copy);
+// document.querySelector('.btn.btn-dark').addEventListener('click', copy);
 
 
 function bracketRemove(){
@@ -13,6 +13,7 @@ function bracketRemove(){
     input = input.replaceAll("&lt;", "<");
     
     output.value = input;
+    copy();
 }
 
 function sr() {
@@ -25,6 +26,7 @@ function sr() {
     let output = document.querySelector('.form-control.output');
 
     firstIndex!=-1 ? output.value = input.substring(firstIndex, lastIndex) : output.value = input;
+    copy();
 }
 
 function tool() {
