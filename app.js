@@ -2,7 +2,7 @@ document.querySelector('.btn.btn-primary').addEventListener('click',bracketRemov
 document.querySelector('.btn.btn-success').addEventListener('click', sr);
 document.querySelector('.btn.btn-warning').addEventListener('click', toolSr);
 document.querySelector('.btn.btn-info').addEventListener('click', tool);
-// document.querySelector('.btn.btn-dark').addEventListener('click', copy);
+
 
 
 function bracketRemove(){
@@ -37,10 +37,7 @@ function toolSr() {
     
 }
 
-
 function copy() {
     let output = document.querySelector('.form-control.output');
     navigator.clipboard.writeText(output.value);
 }
-
-// sdcsd &gt; sdj &lt; skdjv sd &gt; sd &lt; <SearchResult>  asddsfa </SearchResult>sdcsd &gt; sdj &lt; skdjv sd &gt; sd &lt; <SearchResult>  asddsfa </SearchResult>
