@@ -13,8 +13,14 @@ async function bracketRemove(){
     
     output.value = input;
     await copySessionId();
-    await copy();
+    setTimeout(() => {
+        console.log("Fired");
+        copy().then(()=>{
+
+        });
+    }, 1000);
 }
+
 
 function sr() {
 
