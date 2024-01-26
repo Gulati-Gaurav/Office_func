@@ -22,7 +22,7 @@ async function bracketRemove(){
 }
 
 
-function sr() {
+async function sr() {
 
     let input = document.querySelector('.form-control.input').value;
     let output = document.querySelector('.form-control.output');
@@ -31,13 +31,19 @@ function sr() {
     input = input.replaceAll("&lt;", "<");
     
     output.value = input;
-    copySessionId();
+    await copySessionId();
     
     let firstIndex = output.value.indexOf("<SearchResult>");
     let lastIndex = output.value.indexOf("</SearchResult>") + 15;
 
     firstIndex!=-1 ? output.value = output.value.substring(firstIndex, lastIndex) : output.value = "No Search Result Found";
-    copy();
+    
+    setTimeout(() => {
+        console.log("Fired");
+        copy().then(()=>{
+
+        });
+    }, 1000);
 }
 
 function tool() {
