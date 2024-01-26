@@ -4,7 +4,7 @@ document.querySelector('.btn.btn-warning').addEventListener('click', toolSr);
 document.querySelector('.btn.btn-info').addEventListener('click', tool);
 
 
-function bracketRemove(){
+async function bracketRemove(){
     let input = document.querySelector('.form-control.input').value;
     let output = document.querySelector('.form-control.output');
 
@@ -12,8 +12,8 @@ function bracketRemove(){
     input = input.replaceAll("&lt;", "<");
     
     output.value = input;
-    copySessionId();
-    copy();
+    await copySessionId();
+    await copy();
 }
 
 function sr() {
@@ -42,16 +42,16 @@ function toolSr() {
     
 }
 
-function copy() {
+async function copy() {
     let output = document.querySelector('.form-control.output');
-    navigator.clipboard.writeText(output.value);
+    await navigator.clipboard.writeText(output.value);
 }
 
-function copySessionId()
+async function copySessionId()
 {
     let output = document.querySelector('.form-control.output');
     let firstIndex = output.value.indexOf("<SessionId>")+11;
     let lastIndex = output.value.indexOf("</SessionId>");
     console.log(firstIndex, lastIndex);
-    navigator.clipboard.writeText(output.value.substring(firstIndex, lastIndex));
+    await navigator.clipboard.writeText(output.value.substring(firstIndex, lastIndex));
 }
