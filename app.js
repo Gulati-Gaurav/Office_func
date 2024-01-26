@@ -4,7 +4,6 @@ document.querySelector('.btn.btn-warning').addEventListener('click', toolSr);
 document.querySelector('.btn.btn-info').addEventListener('click', tool);
 
 
-
 function bracketRemove(){
     let input = document.querySelector('.form-control.input').value;
     let output = document.querySelector('.form-control.output');
@@ -13,19 +12,25 @@ function bracketRemove(){
     input = input.replaceAll("&lt;", "<");
     
     output.value = input;
+    copySessionId();
     copy();
 }
 
 function sr() {
-    bracketRemove();
-    let input = document.querySelector('.form-control.output').value;
-    let firstIndex = input.indexOf("<SearchResult>");
-    let lastIndex = input.indexOf("</SearchResult>") + 15;
 
-    console.log(firstIndex, lastIndex);
+    let input = document.querySelector('.form-control.input').value;
     let output = document.querySelector('.form-control.output');
 
-    firstIndex!=-1 ? output.value = input.substring(firstIndex, lastIndex) : output.value = input;
+    input = input.replaceAll("&gt;", ">");
+    input = input.replaceAll("&lt;", "<");
+    
+    output.value = input;
+    copySessionId();
+    
+    let firstIndex = output.value.indexOf("<SearchResult>");
+    let lastIndex = output.value.indexOf("</SearchResult>") + 15;
+
+    firstIndex!=-1 ? output.value = output.value.substring(firstIndex, lastIndex) : output.value = "No Search Result Found";
     copy();
 }
 
@@ -40,4 +45,13 @@ function toolSr() {
 function copy() {
     let output = document.querySelector('.form-control.output');
     navigator.clipboard.writeText(output.value);
+}
+
+function copySessionId()
+{
+    let output = document.querySelector('.form-control.output');
+    let firstIndex = output.value.indexOf("<SessionId>")+11;
+    let lastIndex = output.value.indexOf("</SessionId>");
+    console.log(firstIndex, lastIndex);
+    navigator.clipboard.writeText(output.value.substring(firstIndex, lastIndex));
 }
