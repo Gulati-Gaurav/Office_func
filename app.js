@@ -1,8 +1,7 @@
 document.querySelector('.btn.btn-primary').addEventListener('click',bracketRemove);
 document.querySelector('.btn.btn-success').addEventListener('click', sr);
-document.querySelector('.btn.btn-warning').addEventListener('click', toolSr);
-document.querySelector('.btn.btn-info').addEventListener('click', tool);
-
+// document.querySelector('.btn.btn-warning').addEventListener('click', toolSr);
+// document.querySelector('.btn.btn-info').addEventListener('click', tool);
 
 async function bracketRemove(){
     let input = document.querySelector('.form-control.input').value;
@@ -10,6 +9,7 @@ async function bracketRemove(){
 
     input = input.replaceAll("&gt;", ">");
     input = input.replaceAll("&lt;", "<");
+    input = input.replaceAll("&#xD;", "");
     
     output.value = input;
     await copySessionId();
@@ -21,7 +21,6 @@ async function bracketRemove(){
     }, 1000);
 }
 
-
 async function sr() {
 
     let input = document.querySelector('.form-control.input').value;
@@ -29,6 +28,7 @@ async function sr() {
 
     input = input.replaceAll("&gt;", ">");
     input = input.replaceAll("&lt;", "<");
+    input = input.replaceAll("&#xD;", "");
     
     output.value = input;
     await copySessionId();
@@ -44,14 +44,6 @@ async function sr() {
 
         });
     }, 1000);
-}
-
-function tool() {
-    
-}
-
-function toolSr() {
-    
 }
 
 async function copy() {
