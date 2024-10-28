@@ -345,7 +345,7 @@ const XSLTconstant = {
 					"              <DateOfBirth>1990-01-01T00:00:00</DateOfBirth>\n" +
 					"            </xsl:otherwise>\n" +
 					"          </xsl:choose>\n" +
-					"          <Email>rajuk@travelboutiqueonline.com</Email>\n" +
+					"          <Email>uapiair@tbo.com</Email>\n" +
 					"          <FFAirline>\n" +
 					"            <xsl:value-of select=\"''\"/>\n" +
 					"          </FFAirline>\n" +
@@ -374,7 +374,7 @@ const XSLTconstant = {
 					"            <Gender>Male</Gender>\n" +
 					"            <IdDetails>\n" +
 					"              <DocumentIssuingCountry>IN</DocumentIssuingCountry>\n" +
-					"              <IdCardType>NationalId</IdCardType>\n" +
+					"              <IdCardType>Passport</IdCardType>\n" +
 					"              <IdNumber>12345</IdNumber>\n" +
 					"              <IdentityCardExpiryDate>2035-07-01T00:00:00</IdentityCardExpiryDate>\n" +
 					"              <IdentityCardIssueDate>2019-07-01T00:00:00</IdentityCardIssueDate>\n" +
@@ -474,7 +474,7 @@ const XSLTconstant = {
 					"            </LastName>\n" +
 					"          </xsl:if>\n" +
 					"          <xsl:if test=\"$loopIndex=string('5')\">\n" +
-					"            <xsl:variable name=\"FirstName\">Divij</xsl:variable>\n" +
+					"            <xsl:variable name=\"FirstName\">Vishal</xsl:variable>\n" +
 					"            <xsl:variable name=\"LastName\">Dua</xsl:variable>\n" +
 					"            <FirstName>\n" +
 					"              <xsl:value-of select=\"$FirstName\"/>\n" +
@@ -505,8 +505,8 @@ const XSLTconstant = {
 					"            </LastName>\n" +
 					"          </xsl:if>\n" +
 					"          <xsl:if test=\"$loopIndex=string('6')\">\n" +
-					"            <xsl:variable name=\"FirstName\">Rahul</xsl:variable>\n" +
-					"            <xsl:variable name=\"LastName\">Kumar</xsl:variable>\n" +
+					"            <xsl:variable name=\"FirstName\">Mahendra Singh</xsl:variable>\n" +
+					"            <xsl:variable name=\"LastName\">Dhoni</xsl:variable>\n" +
 					"            <FirstName>\n" +
 					"              <xsl:value-of select=\"$FirstName\"/>\n" +
 					"            </FirstName>\n" +
@@ -536,7 +536,7 @@ const XSLTconstant = {
 					"            </LastName>\n" +
 					"          </xsl:if>\n" +
 					"          <xsl:if test=\"$loopIndex=string('7')\">\n" +
-					"            <xsl:variable name=\"FirstName\">Raju</xsl:variable>\n" +
+					"            <xsl:variable name=\"FirstName\">Rajesh</xsl:variable>\n" +
 					"            <xsl:variable name=\"LastName\">Kumar</xsl:variable>\n" +
 					"            <FirstName>\n" +
 					"              <xsl:value-of select=\"$FirstName\"/>\n" +
@@ -634,10 +634,10 @@ const XSLTconstant = {
 					"            <CountryName>India</CountryName>\n" +
 					"            <Nationality>IN</Nationality>\n" +
 					"          </Nationality>\n" +
-					"          <PassportExpiry>2025-12-31T00:00:00</PassportExpiry>\n" +
+					"          <PassportExpiry>2030-12-31T00:00:00</PassportExpiry>\n" +
 					"          <PassportIssueCity>Delhi</PassportIssueCity>\n" +
 					"          <PassportIssueCountryCode>IN</PassportIssueCountryCode>\n" +
-					"          <PassportIssueDate>2010-12-31T00:00:00</PassportIssueDate>\n" +
+					"          <PassportIssueDate>2020-12-31T00:00:00</PassportIssueDate>\n" +
 					"          <PassportNo>123456</PassportNo>\n" +
 					"          <PaxBaggage>\n" +
 					"            <xsl:value-of select=\"''\"/>\n" +
