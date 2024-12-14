@@ -267,8 +267,15 @@ const XSLTconstant = {
 					"            <xsl:when test=\"./PassengerType = 'Child'\">\n" +
 					"              <xsl:value-of select=\"../Fare[PassengerType = 'Adult']/PassengerCount + 1\"/>\n" +
 					"            </xsl:when>\n" +
-					"            <xsl:when test=\"./PassengerType = 'Infant'\">\n" +
-					"              <xsl:value-of select=\"../Fare[PassengerType = 'Adult']/PassengerCount + 1\"/>\n" +
+					"            <xsl:when test=\"./PassengerType = 'Infant'\">\n" + 
+					"                <xsl:choose>\n" + 
+					"                  <xsl:when test=\"../Fare[PassengerType = 'Child']\">\n" + 
+					"                    <xsl:value-of select=\"../Fare[PassengerType = 'Adult']/PassengerCount + ../Fare[PassengerType = 'Child']/PassengerCount + 1\"/>\n" + 
+					"                  </xsl:when>\n" + 
+					"                  <xsl:otherwise>\n" + 
+					"                    <xsl:value-of select=\"../Fare[PassengerType = 'Adult']/PassengerCount + 1\"/>\n" + 
+					"                  </xsl:otherwise>\n" + 
+					"                </xsl:choose>\n" + 
 					"            </xsl:when>\n" +
 					"            <xsl:otherwise>\n" +
 					"              <xsl:value-of select=\"(../Fare[PassengerType = 'Adult']/PassengerCount) + (../Fare[PassengerType = 'Child']/PassengerCount) + (../Fare[PassengerType = 'Child']/PassengerCount) + 1\"/>\n" +
