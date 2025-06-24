@@ -907,6 +907,7 @@ const XSLTconstant = {
     		+ "              </xsl:when>\r\n"
     		+ "            </xsl:choose>\r\n"
     		+ "            <ETicketEligible>true</ETicketEligible>\r\n"
+    		+ "            <FlightInfoIndex><xsl:value-of select=\"flightinfoindex\"/></FlightInfoIndex>\r\n"
     		+ "            <FlightNumber>\r\n"
     		+ "              <xsl:value-of select=\"FlightNumber\"/>\r\n"
     		+ "            </FlightNumber>\r\n"
