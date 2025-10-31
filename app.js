@@ -691,16 +691,6 @@ const XSLTconstant = {
 		"            <AirlineMealCharges>0</AirlineMealCharges>\n" +
 		"            <AirlineSSRCharges>0</AirlineSSRCharges>\n" +
 		"            <AirlineSeatCharges>0</AirlineSeatCharges>\n" +
-		"<xsl:choose>\n"
-		+ "    <xsl:when test=\"number(Commission) > 0\">\n"
-		+ "        <Commission>\n"
-		+ "            <xsl:value-of select=\"(./Commission)div(./PassengerCount)\"/>\n"
-		+ "        </Commission>\n"
-		+ "    </xsl:when>\n"
-		+ "    <xsl:otherwise>\n"
-		+ "        <Commission>0</Commission>\n"
-		+ "    </xsl:otherwise>\n"
-		+ "</xsl:choose>\n" +
 		"            <Currency>\n" +
 		"              <xsl:value-of select=\"$currency\"/>\n" +
 		"            </Currency>\n" +
