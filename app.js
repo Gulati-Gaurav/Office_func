@@ -158,9 +158,10 @@ const XSLTconstant = {
 		"\n" +
 		"  <xsl:variable name=\"currency\" select=\"//SearchResult/Currency\" />\n" +
 		"\n" 
-		+"<xsl:variable name=\"responseParams\">"
-        +"<xsl:copy-of select=\"//SearchResult/ResponseParams/*\"/>"
+		+"<xsl:variable name=\"responseParams\">\n"
+        +"<xsl:copy-of select=\"//SearchResult/ResponseParams/*\"/>\n"
         +"</xsl:variable>\n"+
+		"\n" +
 		"  <xsl:variable name=\"segments\">\n" +
 		"    <xsl:copy-of select=\"//SearchResult/Flights/ArrayOfFlightInfo/FlightInfo\"/>\n" +
 		"  </xsl:variable>\n" +
