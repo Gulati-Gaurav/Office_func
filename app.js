@@ -691,39 +691,9 @@ const XSLTconstant = {
 		"            <AirlineMealCharges>0</AirlineMealCharges>\n" +
 		"            <AirlineSSRCharges>0</AirlineSSRCharges>\n" +
 		"            <AirlineSeatCharges>0</AirlineSeatCharges>\n" +
-		 "<xsl:choose>\r\n"
-		+ "    <xsl:when test=\"number(Commission) > 0\">\r\n"
-		+ "        <Commission>\r\n"
-		+ "            <xsl:value-of select=\"(./Commission)div(./PassengerCount)\"/>\r\n"
-		+ "        </Commission>\r\n"
-		+ "    </xsl:when>\r\n"
-		+ "    <xsl:otherwise>\r\n"
-		+ "        <Commission>0</Commission>\r\n"
-		+ "    </xsl:otherwise>\r\n"
-		+ "</xsl:choose>\r\n" +
 		"            <Currency>\n" +
 		"              <xsl:value-of select=\"$currency\"/>\n" +
 		"            </Currency>\n" +
-		+ "<xsl:choose>\r\n"
-		+ "    <xsl:when test=\"number(Discount) > 0\">\r\n"
-		+ "        <Discount>\r\n"
-		+ "            <xsl:value-of select=\"(./Discount)div(./PassengerCount)\"/>\r\n"
-		+ "        </Discount>\r\n"
-		+ "    </xsl:when>\r\n"
-		+ "    <xsl:otherwise>\r\n"
-		+ "        <Discount>0</Discount>\r\n"
-		+ "    </xsl:otherwise>\r\n"
-		+ "</xsl:choose>\r\n"
-		+ "<xsl:choose>\r\n"
-		+ "    <xsl:when test=\"number(Incentive) > 0\">\r\n"
-		+ "        <Incentive>\r\n"
-		+ "            <xsl:value-of select=\"(./Incentive)div(./PassengerCount)\"/>\r\n"
-		+ "        </Incentive>\r\n"
-		+ "    </xsl:when>\r\n"
-		+ "    <xsl:otherwise>\r\n"
-		+ "        <Incentive>0</Incentive>\r\n"
-		+ "    </xsl:otherwise>\r\n"
-		+ "</xsl:choose>\r\n" +
 		"            <Markup>0</Markup>\n" +
 		"            <NetFare>0</NetFare>\n" +
 		"            <OtherCharges>0</OtherCharges>\n" +
