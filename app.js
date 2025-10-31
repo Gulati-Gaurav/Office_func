@@ -704,26 +704,6 @@ const XSLTconstant = {
 		"            <Currency>\n" +
 		"              <xsl:value-of select=\"$currency\"/>\n" +
 		"            </Currency>\n" +
-		+ "<xsl:choose>\n"
-		+ "    <xsl:when test=\"number(Discount) > 0\">\n"
-		+ "        <Discount>\n"
-		+ "            <xsl:value-of select=\"(./Discount)div(./PassengerCount)\"/>\n"
-		+ "        </Discount>\n"
-		+ "    </xsl:when>\n"
-		+ "    <xsl:otherwise>\n"
-		+ "        <Discount>0</Discount>\n"
-		+ "    </xsl:otherwise>\n"
-		+ "</xsl:choose>\n"
-		+ "<xsl:choose>\n"
-		+ "    <xsl:when test=\"number(Incentive) > 0\">\n"
-		+ "        <Incentive>\n"
-		+ "            <xsl:value-of select=\"(./Incentive)div(./PassengerCount)\"/>\n"
-		+ "        </Incentive>\n"
-		+ "    </xsl:when>\n"
-		+ "    <xsl:otherwise>\n"
-		+ "        <Incentive>0</Incentive>\n"
-		+ "    </xsl:otherwise>\n"
-		+ "</xsl:choose>\n" + 
 		"            <Markup>0</Markup>\n" +
 		"            <NetFare>0</NetFare>\n" +
 		"            <OtherCharges>0</OtherCharges>\n" +
