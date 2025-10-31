@@ -723,7 +723,7 @@ const XSLTconstant = {
 		+ "    <xsl:otherwise>\n"
 		+ "        <Incentive>0</Incentive>\n"
 		+ "    </xsl:otherwise>\n"
-		+ "</xsl:choose>\n" +
+		+ "</xsl:choose>\n" + 
 		"            <Markup>0</Markup>\n" +
 		"            <NetFare>0</NetFare>\n" +
 		"            <OtherCharges>0</OtherCharges>\n" +
