@@ -14,6 +14,10 @@ const infantAge = currentYear - 1;
 const seniorAge = currentYear - 62;
 const AdultAge = currentYear - 30;
 
+function generateRandomTimestamp() {
+	return Math.floor(10000000 + Math.random() * 90000000);
+}
+
 
 async function bracketRemove() {
 	let input = document.querySelector('.form-control.input').value;
