@@ -8,6 +8,13 @@ document.querySelector('.btn.btn-light').addEventListener('click', fQTransformOn
 document.querySelector('.btn.btn-info').addEventListener('click', bookTransform);
 document.querySelector('.btn.btn-danger').addEventListener('click', eraseAll);
 
+const currentYear = new Date().getFullYear();
+const childAge = currentYear - 9;
+const infantAge = currentYear - 1;
+const seniorAge = currentYear - 62;
+const AdultAge = currentYear - 30;
+
+
 async function bracketRemove() {
 	let input = document.querySelector('.form-control.input').value;
 	let output = document.querySelector('.form-control.output');
