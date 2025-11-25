@@ -415,13 +415,6 @@ const XSLTconstant = {
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
 		"            </FullName>\n" +
 		"            <Gender>Male</Gender>\n" +
-		"            <IdDetails>\n" +
-		"              <DocumentIssuingCountry>IN</DocumentIssuingCountry>\n" +
-		"              <IdCardType>Passport</IdCardType>\n" +
-		"              <IdNumber>12345</IdNumber>\n" +
-		"              <IdentityCardExpiryDate>2035-07-01T00:00:00</IdentityCardExpiryDate>\n" +
-		"              <IdentityCardIssueDate>2019-07-01T00:00:00</IdentityCardIssueDate>\n" +
-		"            </IdDetails>\n" +
 		"            <IsLeadPax>true</IsLeadPax>\n" +
 		"            <LastName>\n" +
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
@@ -471,13 +464,6 @@ const XSLTconstant = {
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
 		"            </FullName>\n" +
 		"            <Gender>Male</Gender>\n" +
-		"            <IdDetails>\n" +
-		"              <DocumentIssuingCountry>IN</DocumentIssuingCountry>\n" +
-		"              <IdCardType>Passport</IdCardType>\n" +
-		"              <IdNumber>12346</IdNumber>\n" +
-		"              <IdentityCardExpiryDate>2035-07-01T00:00:00</IdentityCardExpiryDate>\n" +
-		"              <IdentityCardIssueDate>2019-07-01T00:00:00</IdentityCardIssueDate>\n" +
-		"            </IdDetails>\n" +
 		"            <IsLeadPax>true</IsLeadPax>\n" +
 		"            <LastName>\n" +
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
@@ -527,13 +513,6 @@ const XSLTconstant = {
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
 		"            </FullName>\n" +
 		"            <Gender>Male</Gender>\n" +
-		"            <IdDetails>\n" +
-		"              <DocumentIssuingCountry>IN</DocumentIssuingCountry>\n" +
-		"              <IdCardType>Passport</IdCardType>\n" +
-		"              <IdNumber>12347</IdNumber>\n" +
-		"              <IdentityCardExpiryDate>2035-07-01T00:00:00</IdentityCardExpiryDate>\n" +
-		"              <IdentityCardIssueDate>2019-07-01T00:00:00</IdentityCardIssueDate>\n" +
-		"            </IdDetails>\n" +
 		"            <IsLeadPax>true</IsLeadPax>\n" +
 		"            <LastName>\n" +
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
@@ -632,12 +611,6 @@ const XSLTconstant = {
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
 		"            </FullName>\n" +
 		"            <Gender>Male</Gender>\n" +
-		"            <IdDetails>\n" +
-		"              <DocumentIssuingCountry>IN</DocumentIssuingCountry>\n" +
-		"              <IdNumber>12348</IdNumber>\n" +
-		"              <IdentityCardExpiryDate>2035-07-01T00:00:00</IdentityCardExpiryDate>\n" +
-		"              <IdentityCardIssueDate>2019-07-01T00:00:00</IdentityCardIssueDate>\n" +
-		"            </IdDetails>\n" +
 		"            <IsLeadPax>true</IsLeadPax>\n" +
 		"            <LastName>\n" +
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
@@ -687,12 +660,6 @@ const XSLTconstant = {
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
 		"            </FullName>\n" +
 		"            <Gender>Male</Gender>\n" +
-		"            <IdDetails>\n" +
-		"              <DocumentIssuingCountry>IN</DocumentIssuingCountry>\n" +
-		"              <IdNumber>12349</IdNumber>\n" +
-		"              <IdentityCardExpiryDate>2035-07-01T00:00:00</IdentityCardExpiryDate>\n" +
-		"              <IdentityCardIssueDate>2019-07-01T00:00:00</IdentityCardIssueDate>\n" +
-		"            </IdDetails>\n" +
 		"            <IsLeadPax>true</IsLeadPax>\n" +
 		"            <LastName>\n" +
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
@@ -742,12 +709,6 @@ const XSLTconstant = {
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
 		"            </FullName>\n" +
 		"            <Gender>Male</Gender>\n" +
-		"            <IdDetails>\n" +
-		"              <DocumentIssuingCountry>IN</DocumentIssuingCountry>\n" +
-		"              <IdNumber>12350</IdNumber>\n" +
-		"              <IdentityCardExpiryDate>2035-07-01T00:00:00</IdentityCardExpiryDate>\n" +
-		"              <IdentityCardIssueDate>2019-07-01T00:00:00</IdentityCardIssueDate>\n" +
-		"            </IdDetails>\n" +
 		"            <IsLeadPax>true</IsLeadPax>\n" +
 		"            <LastName>\n" +
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
@@ -797,12 +758,6 @@ const XSLTconstant = {
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
 		"            </FullName>\n" +
 		"            <Gender>Female</Gender>\n" +
-		"            <IdDetails>\n" +
-		"              <DocumentIssuingCountry>IN</DocumentIssuingCountry>\n" +
-		"              <IdNumber>12351</IdNumber>\n" +
-		"              <IdentityCardExpiryDate>2035-07-01T00:00:00</IdentityCardExpiryDate>\n" +
-		"              <IdentityCardIssueDate>2019-07-01T00:00:00</IdentityCardIssueDate>\n" +
-		"            </IdDetails>\n" +
 		"            <IsLeadPax>true</IsLeadPax>\n" +
 		"            <LastName>\n" +
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
@@ -852,12 +807,6 @@ const XSLTconstant = {
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
 		"            </FullName>\n" +
 		"            <Gender>Male</Gender>\n" +
-		"            <IdDetails>\n" +
-		"              <DocumentIssuingCountry>IN</DocumentIssuingCountry>\n" +
-		"              <IdNumber>12352</IdNumber>\n" +
-		"              <IdentityCardExpiryDate>2035-07-01T00:00:00</IdentityCardExpiryDate>\n" +
-		"              <IdentityCardIssueDate>2019-07-01T00:00:00</IdentityCardIssueDate>\n" +
-		"            </IdDetails>\n" +
 		"            <IsLeadPax>true</IsLeadPax>\n" +
 		"            <LastName>\n" +
 		"              <xsl:value-of select=\"$LastName\"/>\n" +
@@ -873,7 +822,7 @@ const XSLTconstant = {
 		"          <PassportIssueCity>Delhi</PassportIssueCity>\n" +
 		"          <PassportIssueCountryCode>IN</PassportIssueCountryCode>\n" +
 		"          <PassportIssueDate>2020-12-31T00:00:00</PassportIssueDate>\n" +
-		"          <PassportNo>123456</PassportNo>\n" +
+		"          <PassportNo></PassportNo>\n" +
 		"          <PaxBaggage>\n" +
 		"            <xsl:value-of select=\"''\"/>\n" +
 		"          </PaxBaggage>\n" +
