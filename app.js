@@ -369,10 +369,10 @@ const XSLTconstant = {
 		"          </xsl:variable>\n" +
 		"          <xsl:choose>\n" +
 		"            <xsl:when test=\"$passengerType=string('Infant')\">\n" +
-		"              <DateOfBirth>2024-07-01T00:00:00</DateOfBirth>\n" +
+		"              <DateOfBirth>2025-07-01T00:00:00</DateOfBirth>\n" +
 		"            </xsl:when>\n" +
 		"            <xsl:when test=\"$passengerType=string('Child')\">\n" +
-		"              <DateOfBirth>2014-01-01T00:00:00</DateOfBirth>\n" +
+		"              <DateOfBirth>2020-01-01T00:00:00</DateOfBirth>\n" +
 		"            </xsl:when>\n" +
 		"            <xsl:when test=\"$passengerType=string('Senior')\">\n" +
 		"              <DateOfBirth>1962-01-01T00:00:00</DateOfBirth>\n" +
