@@ -8,6 +8,8 @@ document.querySelector('.btn.btn-light').addEventListener('click', fQTransformOn
 document.querySelector('.btn.btn-info').addEventListener('click', bookTransform);
 document.querySelector('.btn.btn-danger').addEventListener('click', eraseAll);
 document.getElementById('btn-json-farequote').addEventListener('click', jsonFareQuoteTransform);
+document.getElementById('btn-json-search-to-fq').addEventListener('click', jsonSearchToFqReqJson);
+document.getElementById('btn-json-fq-to-book').addEventListener('click', jsonFqRespToBookReqJson);
 
 const currentYear = new Date().getFullYear();
 const childAge = currentYear - 9;
@@ -522,6 +524,394 @@ function transformSearch(searchResultSet, stepName) {
 	return new XMLSerializer().serializeToString(transformedDoc);
 }
 
+
+function normalizeKeys(obj) {
+	if (obj == null || typeof obj !== 'object') return obj;
+	if (Array.isArray(obj)) return obj.map(normalizeKeys);
+	const out = {};
+	for (const [k, v] of Object.entries(obj)) {
+		const nk = k.charAt(0).toUpperCase() + k.slice(1);
+		out[nk] = normalizeKeys(v);
+	}
+	return out;
+}
+
+function getResultsArray(parsed) {
+	if (Array.isArray(parsed.Results) && parsed.Results.length > 0) {
+		const first = parsed.Results[0];
+		return Array.isArray(first) ? first : parsed.Results;
+	}
+	if (Array.isArray(parsed.results) && parsed.results.length > 0) {
+		const first = parsed.results[0];
+		return Array.isArray(first) ? first : parsed.results;
+	}
+	return null;
+}
+
+function selectResultAndFare(parsed, filterText) {
+	const results = getResultsArray(parsed);
+	if (!results || results.length === 0) {
+		throw new Error('No Results array found in the search response JSON.');
+	}
+
+	if (!filterText || !filterText.trim()) {
+		const r = results[0];
+		const fbd = r.FareBreakupDetails || r.fareBreakupDetails || [];
+		return { result: r, fare: fbd[0] || null };
+	}
+
+	const ft = filterText.trim().toLowerCase();
+
+	for (const r of results) {
+		const rStr = JSON.stringify(r).toLowerCase();
+		if (rStr.includes(ft)) {
+			const fbd = r.FareBreakupDetails || r.fareBreakupDetails || [];
+			const fareMatch = fbd.find(f => JSON.stringify(f).toLowerCase().includes(ft));
+			if (fareMatch) {
+				return { result: r, fare: fareMatch };
+			}
+			return { result: r, fare: fbd[0] || null };
+		}
+	}
+
+	for (const r of results) {
+		const fbd = r.FareBreakupDetails || r.fareBreakupDetails || [];
+		for (const f of fbd) {
+			if (JSON.stringify(f).toLowerCase().includes(ft)) {
+				return { result: r, fare: f };
+			}
+		}
+	}
+
+	const r = results[0];
+	const fbd = r.FareBreakupDetails || r.fareBreakupDetails || [];
+	return { result: r, fare: fbd[0] || null };
+}
+
+function collectAirlineCodes(result) {
+	const codes = new Set();
+	const flights = result.Flights || result.flights || [];
+	for (const journey of flights) {
+		if (!Array.isArray(journey)) continue;
+		for (const seg of journey) {
+			const code = seg.AirlineCode || seg.airlineCode;
+			if (code) codes.add(code);
+		}
+	}
+	return [...codes];
+}
+
+function buildClientDetails(sessionId) {
+	return {
+		SessionID: sessionId || '',
+		UserIP: '192.168.1.100',
+		AgencyId: 'AGN001',
+		ClientAgencyType: 'B2B',
+		UserName: 'testuser',
+		Password: 'testpass'
+	};
+}
+
+function buildSourceContext(fare, incAirlines) {
+	const pkd = fare.PricingKeyDetail || fare.pricingKeyDetail;
+	const pricingArr = pkd ? (Array.isArray(pkd) ? pkd : [pkd]) : [];
+	return {
+		SourceDetails: [{
+			Source: fare.Source || fare.source || '',
+			CredCfg: { UserName: 'suppuser', Password: 'supppass' },
+			IncAirlines: incAirlines || [],
+			ExcAirlines: [],
+			IdentificationCode: fare.IdentificationCode || fare.identificationCode || '',
+			PricingKeyDetail: pricingArr,
+			PromoCode: fare.PromoCode || fare.promoCode || ''
+		}]
+	};
+}
+
+async function jsonSearchToFqReqJson() {
+	const inputEl = document.querySelector('.form-control.input');
+	const output = document.querySelector('.form-control.output');
+	const filterEl = document.getElementById('json-filter-text');
+	const filterText = filterEl ? filterEl.value : '';
+
+	try {
+		const parsed = JSON.parse(inputEl.value.trim());
+		const sessionId = parsed.SessionId || parsed.sessionId || parsed.session_id || '';
+
+		if (sessionId) {
+			try { await navigator.clipboard.writeText(sessionId); } catch (_) {}
+			await new Promise(r => setTimeout(r, 150));
+			await new Promise(r => setTimeout(r, 1000));
+		}
+
+		const { result, fare } = selectResultAndFare(parsed, filterText);
+		if (!fare) throw new Error('No FareBreakupDetails found in the selected result.');
+
+		const airlines = collectAirlineCodes(result);
+
+		const resultCopy = JSON.parse(JSON.stringify(result));
+		resultCopy.FareBreakupDetails = [fare];
+
+		const fqReq = {
+			ClientDetails: buildClientDetails(sessionId),
+			SourceContext: buildSourceContext(fare, airlines),
+			SearchResult: resultCopy
+		};
+
+		output.value = JSON.stringify(fqReq, null, 4);
+		await copy();
+	} catch (e) {
+		output.value = e instanceof Error ? e.message : String(e);
+	}
+}
+
+async function jsonFqRespToBookReqJson() {
+	const inputEl = document.querySelector('.form-control.input');
+	const output = document.querySelector('.form-control.output');
+
+	try {
+		const parsed = JSON.parse(inputEl.value.trim());
+		const sessionId = parsed.SessionId || parsed.sessionId || parsed.session_id || '';
+
+		if (sessionId) {
+			try { await navigator.clipboard.writeText(sessionId); } catch (_) {}
+			await new Promise(r => setTimeout(r, 150));
+			await new Promise(r => setTimeout(r, 1000));
+		}
+
+		const sr = parsed.SearchResult || parsed.searchResult;
+		if (!sr) throw new Error('No SearchResult found in the Farequote Response JSON.');
+
+		const fbd = sr.FareBreakupDetails || sr.fareBreakupDetails || [];
+		if (!fbd.length) throw new Error('No FareBreakupDetails found in SearchResult.');
+		const fare = fbd[0];
+
+		const fareBreakdown = fare.FareBreakdown || fare.fareBreakdown || [];
+		const firstFare = fareBreakdown[0] || {};
+
+		const flights = sr.Flights || sr.flights || [];
+		const firstJourney = flights[0] || [];
+
+		const segments = firstJourney.map((seg, i) => ({
+			FlightNumber: seg.FlightNumber || seg.flightNumber || '',
+			AirlineCode: seg.AirlineCode || seg.airlineCode || '',
+			Origin: seg.Origin || seg.origin || '',
+			Destination: seg.Destination || seg.destination || '',
+			DepTime: seg.DepTime || seg.depTime || seg.DepartureTime || seg.departureTime || '',
+			ArrTime: seg.ArrTime || seg.arrTime || seg.ArrivalTime || seg.arrivalTime || '',
+			DepTerminal: seg.DepTerminal || seg.depTerminal || '',
+			ArrTerminal: seg.ArrTerminal || seg.arrTerminal || '',
+			Duration: seg.Duration || seg.duration || 0,
+			NumStops: seg.NumStops || seg.numStops || 0,
+			CabinClass: seg.CabinClass || seg.cabinClass || 'Economy',
+			BookingClass: seg.BookingClass || seg.bookingClass || '',
+			OperatingCarrier: seg.OperatingCarrier || seg.operatingCarrier || '',
+			Equipment: seg.Equipment || seg.equipment || '',
+			CraftType: seg.CraftType || seg.craftType || '',
+			StopPointArrivalTime: seg.StopPointArrivalTime || seg.stopPointArrivalTime || null,
+			StopPointDepartureTime: seg.StopPointDepartureTime || seg.stopPointDepartureTime || null,
+			FlightInfoIndex: seg.FlightInfoIndex || seg.flightInfoIndex || String(i),
+			FlightRef: `FL-${String(i + 1).padStart(3, '0')}`,
+			NoOfSeatAvailable: seg.NoOfSeatAvailable || seg.noOfSeatAvailable || 0,
+			MarriageGrpInd: seg.MarriageGrpInd || seg.marriageGrpInd || ''
+		}));
+
+		const firstSeg = segments[0] || {};
+		const lastSeg = segments[segments.length - 1] || {};
+		const airlineCode = fare.ValidatingAirline || fare.validatingAirline || firstSeg.AirlineCode || '';
+		const airlines = [...new Set(segments.map(s => s.AirlineCode).filter(Boolean))];
+
+		const apd = fare.AirProductDetails || fare.airProductDetails || [];
+		const firstApd = apd[0] || {};
+
+		const segDetails = (firstFare.SegmentDetails || firstFare.segmentDetails || []).map(sd => ({
+			FlightInfoIndex: sd.FlightInfoIndex || sd.flightInfoIndex || '0',
+			FareBasis: sd.FareBasis || sd.fareBasis || firstApd.FareBasisCode || firstApd.fareBasisCode || '',
+			BookingClass: sd.BookingClass || sd.bookingClass || firstSeg.BookingClass || '',
+			CabinBaggage: sd.CabinBaggage || sd.cabinBaggage || null,
+			CheckedInBaggage: sd.CheckedInBaggage || sd.checkedInBaggage || null
+		}));
+
+		const fareRules = segments.map(seg => {
+			const matchApd = apd.find(a =>
+				String(a.FlightInfoIndex || a.flightInfoIndex) === String(seg.FlightInfoIndex)
+			) || firstApd;
+			return {
+				Origin: seg.Origin,
+				Destination: seg.Destination,
+				Airline: seg.AirlineCode,
+				FareBasis: matchApd.FareBasisCode || matchApd.fareBasisCode || '',
+				FareBasisCode: matchApd.FareBasisCode || matchApd.fareBasisCode || '',
+				FareFamilyCode: matchApd.FareFamilyCode || matchApd.fareFamilyCode || '',
+				RuleDetail: fare.AirlineRemark || fare.airlineRemark || '',
+				FareRestriction: (fare.IsRefundable || fare.isRefundable) ? 'Refundable' : 'NonRefundable',
+				FareRuleIndex: seg.FlightInfoIndex,
+				JourneyId: 'J1',
+				DepartureTime: seg.DepTime
+			};
+		});
+
+		const paxCount = firstFare.PassengerCount || firstFare.passengerCount || 1;
+		const baseFare = Number(firstFare.BaseFare || firstFare.baseFare || 0);
+		const taxTotal = Number(firstFare.Tax || firstFare.tax || 0);
+		const yqTax = Number(firstFare.YQTax || firstFare.yqTax || 0);
+		const perPaxBase = baseFare / paxCount;
+		const perPaxTax = taxTotal / paxCount;
+		const publishedFare = perPaxBase + perPaxTax;
+
+		const taxList = (firstFare.TaxList || firstFare.taxList || []).map(t => ({
+			Amount: Number(t.Amount || t.amount || 0),
+			TaxType: t.TaxType || t.taxType || ''
+		}));
+
+		const cancelPenalty = fare.Penalty?.CancelPenaltyAmount
+			|| fare.penalty?.cancelPenaltyAmount || 0;
+
+		const depTime = firstSeg.DepTime || '';
+		const travelDate = depTime ? depTime.split('T')[0] + 'T00:00:00' : '';
+
+		const passenger = {
+			FirstName: 'Rahul',
+			LastName: 'Sharma',
+			Title: 'Mr',
+			CellCountryCode: '91',
+			CellPhone: '9876543210',
+			IsLeadPax: true,
+			DateOfBirth: '1990-05-15T00:00:00Z',
+			Type: 1,
+			PassportNo: 'A1234567',
+			Nationality: 'IN',
+			City: 'New Delhi',
+			AddressLine1: '123 MG Road',
+			AddressLine2: 'Sector 5',
+			Gender: 1,
+			Email: 'rahul.sharma@example.com',
+			Meal: { Code: 'VGML', Description: 'Vegetarian Meal' },
+			PaxPreference: { Code: 'WHEELCHAIR', Description: 'Wheelchair required' },
+			Seat: { Code: 'WINDOW', Description: 'Window Seat' },
+			Price: {
+				PublishedFare: publishedFare,
+				NetFare: publishedFare - 300,
+				Markup: 100,
+				OtherCharges: 50,
+				Tax: perPaxTax,
+				TransactionFee: 25,
+				Currency: fare.Currency || fare.currency || 'INR',
+				AccPriceType: 1,
+				RateOfExchange: 1.0,
+				AdditionalTxnFee: 0,
+				YQTax: yqTax,
+				AirlineBaggageCharges: 0,
+				AirlineMealCharges: 0,
+				AirlineSeatCharges: 0,
+				AirlineSSRCharges: 0,
+				TaxBreakup: taxList,
+				CancelCharges: Number(cancelPenalty),
+				RefundAmount: 0,
+				CreditCardCharges: 0,
+				Commission: 50,
+				Incentive: 10,
+				Discount: 0,
+				PLBAmount: 0,
+				FlightIDRefList: segments.map(s => s.FlightRef)
+			},
+			Prices: [],
+			FFAirline: airlineCode,
+			FFNumber: 'FF123456',
+			PaxKey: 'PAX-001',
+			PaxKeyRef: 'REF-001',
+			PassportExpiry: '2030-12-31T00:00:00Z',
+			TicketNumber: '',
+			FlightBoardedStatus: [],
+			PostalCode: '110001',
+			IdDetails: {
+				IdCardCode: 'PP',
+				IdNumber: 'A1234567',
+				AlphaCheck: '',
+				ZipCode: '110001',
+				DiscountCode: '',
+				IdentityCardIssueDate: '2020-01-01T00:00:00Z',
+				IdentityCardExpiryDate: '2030-12-31T00:00:00Z',
+				DocumentIssuingCountry: 'IN',
+				IdCardType: 'Passport',
+				IdProofPath: ''
+			},
+			DocumentDetails: [],
+			ContactDetails: [{
+				ContactType: 'Emergency',
+				PhoneNumber: '9876543211',
+				PhonePrefix: '91',
+				Email: 'emergency@example.com',
+				Remarks: ''
+			}],
+			DiscountType: 'NotSet',
+			PassportIssueCountryCode: 'IN',
+			PassportIssueIsoCountryCode: 'IN',
+			PassportIssueCity: 'New Delhi',
+			HesCode: '',
+			PassportIssueDate: '2020-01-15T00:00:00Z',
+			GSTNumber: '22AAAAA0000A1Z5',
+			GSTContactNumber: '9876543210',
+			GSTName: 'ABC Travels',
+			GSTAddress: '456 Business Park',
+			GSTEmail: 'gst@abctravels.com',
+			PhoneDetails: [{
+				PhoneType: 'Mobile',
+				Number: '9876543210',
+				InternationalCode: '91',
+				AreaCode: '011',
+				Extension: ''
+			}],
+			AddressDetails: [{
+				AddressLine1: '123 MG Road',
+				AddressLine2: 'Sector 5',
+				PostalCode: '110001',
+				CellPhoneNumber: '9876543210',
+				CellCountryCode: '91',
+				EmailId: 'rahul.sharma@example.com',
+				ProvinceState: 'Delhi',
+				City: 'New Delhi'
+			}],
+			GSTCity: 'New Delhi',
+			GSTCountryName: 'India',
+			GSTPostalCode: '110001',
+			GSTCountryCode: 'IN',
+			GSTState: 'Delhi',
+			SegmentDetails: segDetails
+		};
+
+		const bookReq = {
+			ClientDetails: buildClientDetails(sessionId),
+			SourceContext: buildSourceContext(fare, airlines),
+			FlightItinerary: {
+				Segments: segments,
+				FareRules: fareRules,
+				FlightBookingSource: fare.Source || fare.source || '',
+				SupplierSourceID: 6,
+				Origin: firstSeg.Origin || '',
+				Destination: lastSeg.Destination || '',
+				PNR: '',
+				Passenger: [passenger],
+				IssuanceType: fare.IssuanceType || fare.issuanceType || 'ETicket',
+				SessionId: sessionId,
+				UniqueId: 'UNIQ-BK-' + String(generateRandomTimestamp()).slice(0, 3),
+				TravelDate: travelDate,
+				ValidatingAirlineCode: airlineCode,
+				AliasAirlineCode: '',
+				AirlineCode: airlineCode,
+				ClientName: 'ABC Travels',
+				UserName: 'testuser',
+				DiscountFareType: 'NotSet',
+				BookType: 1
+			}
+		};
+
+		output.value = JSON.stringify(bookReq, null, 4);
+		await copy();
+	} catch (e) {
+		output.value = e instanceof Error ? e.message : String(e);
+	}
+}
 
 const XSLTconstant = {
 	BookXslt: "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
