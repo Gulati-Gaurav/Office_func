@@ -886,6 +886,7 @@ async function jsonFqRespToBookReqJson() {
 			FlightItinerary: {
 				Segments: segments,
 				FareRules: fareRules,
+				FareKey: fare.FareKey || fare.fareKey || '',
 				FlightBookingSource: fare.Source || fare.source || '',
 				SupplierSourceID: 6,
 				Origin: firstSeg.Origin || '',
