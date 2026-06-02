@@ -665,6 +665,170 @@ async function jsonSearchToFqReqJson() {
 	}
 }
 
+function passengerTypeToBookType(passengerType) {
+	const normalizedType = String(passengerType || '').trim().toLowerCase();
+	if (normalizedType === 'child') return 2;
+	if (normalizedType === 'infant') return 3;
+	if (normalizedType === 'senior') return 4;
+	return 1;
+}
+
+function dateOfBirthForPassengerType(passengerType) {
+	const normalizedType = String(passengerType || '').trim().toLowerCase();
+	if (normalizedType === 'infant') return `${infantAge}-07-01T00:00:00Z`;
+	if (normalizedType === 'child') return '2020-01-01T00:00:00Z';
+	if (normalizedType === 'senior') return '1962-01-01T00:00:00Z';
+	return '1990-05-15T00:00:00Z';
+}
+
+function mapSegmentDetailsForFare(fareRow, firstApd, firstSeg) {
+	const rawSegmentDetails = fareRow.SegmentDetails || fareRow.segmentDetails || [];
+	return rawSegmentDetails.map(sd => ({
+		FlightInfoIndex: sd.FlightInfoIndex || sd.flightInfoIndex || '0',
+		FareBasis: sd.FareBasis || sd.fareBasis || firstApd.FareBasisCode || firstApd.fareBasisCode || '',
+		BookingClass: sd.BookingClass || sd.bookingClass || firstSeg.BookingClass || '',
+		CabinBaggage: sd.CabinBaggage || sd.cabinBaggage || null,
+		CheckedInBaggage: sd.CheckedInBaggage || sd.checkedInBaggage || null
+	}));
+}
+
+function buildPassengerFromFareRow(fareRow, options) {
+	const {
+		fare,
+		segments,
+		airlineCode,
+		firstApd,
+		firstSeg,
+		cancelPenalty,
+		isLeadPax,
+		passengerIndex
+	} = options;
+
+	const paxCount = Number(fareRow.PassengerCount || fareRow.passengerCount || 1) || 1;
+	const baseFare = Number(fareRow.BaseFare || fareRow.baseFare || 0);
+	const taxTotal = Number(fareRow.Tax || fareRow.tax || 0);
+	const yqTax = Number(fareRow.YQTax || fareRow.yqTax || 0);
+	const perPaxBase = baseFare / paxCount;
+	const perPaxTax = taxTotal / paxCount;
+	const publishedFare = perPaxBase + perPaxTax;
+	const taxList = (fareRow.TaxList || fareRow.taxList || []).map(t => ({
+		Amount: Number(t.Amount || t.amount || 0),
+		TaxType: t.TaxType || t.taxType || ''
+	}));
+	const paxId = String(passengerIndex + 1).padStart(3, '0');
+	const passengerType = fareRow.PassengerType || fareRow.passengerType || 'Adult';
+
+	return {
+		FirstName: `Pax${paxId}`,
+		LastName: 'Sharma',
+		Title: 'Mr',
+		CellCountryCode: '91',
+		CellPhone: '9876543210',
+		IsLeadPax: isLeadPax,
+		DateOfBirth: dateOfBirthForPassengerType(passengerType),
+		Type: passengerTypeToBookType(passengerType),
+		PassportNo: 'A1234567',
+		Nationality: 'IN',
+		City: 'New Delhi',
+		AddressLine1: '123 MG Road',
+		AddressLine2: 'Sector 5',
+		Gender: 1,
+		Email: 'rahul.sharma@example.com',
+		Meal: { Code: 'VGML', Description: 'Vegetarian Meal' },
+		PaxPreference: { Code: 'WHEELCHAIR', Description: 'Wheelchair required' },
+		Seat: { Code: 'WINDOW', Description: 'Window Seat' },
+		Price: {
+			PublishedFare: publishedFare,
+			NetFare: publishedFare - 300,
+			Markup: 100,
+			OtherCharges: 50,
+			Tax: perPaxTax,
+			TransactionFee: 25,
+			Currency: fare.Currency || fare.currency || 'INR',
+			AccPriceType: 1,
+			RateOfExchange: 1.0,
+			AdditionalTxnFee: 0,
+			YQTax: yqTax,
+			AirlineBaggageCharges: 0,
+			AirlineMealCharges: 0,
+			AirlineSeatCharges: 0,
+			AirlineSSRCharges: 0,
+			TaxBreakup: taxList,
+			CancelCharges: Number(cancelPenalty),
+			RefundAmount: 0,
+			CreditCardCharges: 0,
+			Commission: 50,
+			Incentive: 10,
+			Discount: 0,
+			PLBAmount: 0,
+			FlightIDRefList: segments.map(s => s.FlightRef)
+		},
+		Prices: [],
+		FFAirline: airlineCode,
+		FFNumber: 'FF123456',
+		PaxKey: `PAX-${paxId}`,
+		PaxKeyRef: `REF-${paxId}`,
+		PassportExpiry: '2030-12-31T00:00:00Z',
+		TicketNumber: '',
+		FlightBoardedStatus: [],
+		PostalCode: '110001',
+		IdDetails: {
+			IdCardCode: 'PP',
+			IdNumber: 'A1234567',
+			AlphaCheck: '',
+			ZipCode: '110001',
+			DiscountCode: '',
+			IdentityCardIssueDate: '2020-01-01T00:00:00Z',
+			IdentityCardExpiryDate: '2030-12-31T00:00:00Z',
+			DocumentIssuingCountry: 'IN',
+			IdCardType: 'Passport',
+			IdProofPath: ''
+		},
+		DocumentDetails: [],
+		ContactDetails: [{
+			ContactType: 'Emergency',
+			PhoneNumber: '9876543211',
+			PhonePrefix: '91',
+			Email: 'emergency@example.com',
+			Remarks: ''
+		}],
+		DiscountType: 'NotSet',
+		PassportIssueCountryCode: 'IN',
+		PassportIssueIsoCountryCode: 'IN',
+		PassportIssueCity: 'New Delhi',
+		HesCode: '',
+		PassportIssueDate: '2020-01-15T00:00:00Z',
+		GSTNumber: '22AAAAA0000A1Z5',
+		GSTContactNumber: '9876543210',
+		GSTName: 'ABC Travels',
+		GSTAddress: '456 Business Park',
+		GSTEmail: 'gst@abctravels.com',
+		PhoneDetails: [{
+			PhoneType: 'Mobile',
+			Number: '9876543210',
+			InternationalCode: '91',
+			AreaCode: '011',
+			Extension: ''
+		}],
+		AddressDetails: [{
+			AddressLine1: '123 MG Road',
+			AddressLine2: 'Sector 5',
+			PostalCode: '110001',
+			CellPhoneNumber: '9876543210',
+			CellCountryCode: '91',
+			EmailId: 'rahul.sharma@example.com',
+			ProvinceState: 'Delhi',
+			City: 'New Delhi'
+		}],
+		GSTCity: 'New Delhi',
+		GSTCountryName: 'India',
+		GSTPostalCode: '110001',
+		GSTCountryCode: 'IN',
+		GSTState: 'Delhi',
+		SegmentDetails: mapSegmentDetailsForFare(fareRow, firstApd, firstSeg)
+	};
+}
+
 async function jsonFqRespToBookReqJson() {
 	const inputEl = document.querySelector('.form-control.input');
 	const output = document.querySelector('.form-control.output');
@@ -687,7 +851,6 @@ async function jsonFqRespToBookReqJson() {
 		const fare = fbd[0];
 
 		const fareBreakdown = fare.FareBreakdown || fare.fareBreakdown || [];
-		const firstFare = fareBreakdown[0] || {};
 
 		const flights = sr.Flights || sr.flights || [];
 		const firstJourney = flights[0] || [];
@@ -724,14 +887,6 @@ async function jsonFqRespToBookReqJson() {
 		const apd = fare.AirProductDetails || fare.airProductDetails || [];
 		const firstApd = apd[0] || {};
 
-		const segDetails = (firstFare.SegmentDetails || firstFare.segmentDetails || []).map(sd => ({
-			FlightInfoIndex: sd.FlightInfoIndex || sd.flightInfoIndex || '0',
-			FareBasis: sd.FareBasis || sd.fareBasis || firstApd.FareBasisCode || firstApd.fareBasisCode || '',
-			BookingClass: sd.BookingClass || sd.bookingClass || firstSeg.BookingClass || '',
-			CabinBaggage: sd.CabinBaggage || sd.cabinBaggage || null,
-			CheckedInBaggage: sd.CheckedInBaggage || sd.checkedInBaggage || null
-		}));
-
 		const fareRules = segments.map(seg => {
 			const matchApd = apd.find(a =>
 				String(a.FlightInfoIndex || a.flightInfoIndex) === String(seg.FlightInfoIndex)
@@ -751,134 +906,35 @@ async function jsonFqRespToBookReqJson() {
 			};
 		});
 
-		const paxCount = firstFare.PassengerCount || firstFare.passengerCount || 1;
-		const baseFare = Number(firstFare.BaseFare || firstFare.baseFare || 0);
-		const taxTotal = Number(firstFare.Tax || firstFare.tax || 0);
-		const yqTax = Number(firstFare.YQTax || firstFare.yqTax || 0);
-		const perPaxBase = baseFare / paxCount;
-		const perPaxTax = taxTotal / paxCount;
-		const publishedFare = perPaxBase + perPaxTax;
-
-		const taxList = (firstFare.TaxList || firstFare.taxList || []).map(t => ({
-			Amount: Number(t.Amount || t.amount || 0),
-			TaxType: t.TaxType || t.taxType || ''
-		}));
-
 		const cancelPenalty = fare.Penalty?.CancelPenaltyAmount
 			|| fare.penalty?.cancelPenaltyAmount || 0;
 
 		const depTime = firstSeg.DepTime || '';
 		const travelDate = depTime ? depTime.split('T')[0] + 'T00:00:00' : '';
 
-		const passenger = {
-			FirstName: 'Rahul',
-			LastName: 'Sharma',
-			Title: 'Mr',
-			CellCountryCode: '91',
-			CellPhone: '9876543210',
-			IsLeadPax: true,
-			DateOfBirth: '1990-05-15T00:00:00Z',
-			Type: 1,
-			PassportNo: 'A1234567',
-			Nationality: 'IN',
-			City: 'New Delhi',
-			AddressLine1: '123 MG Road',
-			AddressLine2: 'Sector 5',
-			Gender: 1,
-			Email: 'rahul.sharma@example.com',
-			Meal: { Code: 'VGML', Description: 'Vegetarian Meal' },
-			PaxPreference: { Code: 'WHEELCHAIR', Description: 'Wheelchair required' },
-			Seat: { Code: 'WINDOW', Description: 'Window Seat' },
-			Price: {
-				PublishedFare: publishedFare,
-				NetFare: publishedFare - 300,
-				Markup: 100,
-				OtherCharges: 50,
-				Tax: perPaxTax,
-				TransactionFee: 25,
-				Currency: fare.Currency || fare.currency || 'INR',
-				AccPriceType: 1,
-				RateOfExchange: 1.0,
-				AdditionalTxnFee: 0,
-				YQTax: yqTax,
-				AirlineBaggageCharges: 0,
-				AirlineMealCharges: 0,
-				AirlineSeatCharges: 0,
-				AirlineSSRCharges: 0,
-				TaxBreakup: taxList,
-				CancelCharges: Number(cancelPenalty),
-				RefundAmount: 0,
-				CreditCardCharges: 0,
-				Commission: 50,
-				Incentive: 10,
-				Discount: 0,
-				PLBAmount: 0,
-				FlightIDRefList: segments.map(s => s.FlightRef)
-			},
-			Prices: [],
-			FFAirline: airlineCode,
-			FFNumber: 'FF123456',
-			PaxKey: 'PAX-001',
-			PaxKeyRef: 'REF-001',
-			PassportExpiry: '2030-12-31T00:00:00Z',
-			TicketNumber: '',
-			FlightBoardedStatus: [],
-			PostalCode: '110001',
-			IdDetails: {
-				IdCardCode: 'PP',
-				IdNumber: 'A1234567',
-				AlphaCheck: '',
-				ZipCode: '110001',
-				DiscountCode: '',
-				IdentityCardIssueDate: '2020-01-01T00:00:00Z',
-				IdentityCardExpiryDate: '2030-12-31T00:00:00Z',
-				DocumentIssuingCountry: 'IN',
-				IdCardType: 'Passport',
-				IdProofPath: ''
-			},
-			DocumentDetails: [],
-			ContactDetails: [{
-				ContactType: 'Emergency',
-				PhoneNumber: '9876543211',
-				PhonePrefix: '91',
-				Email: 'emergency@example.com',
-				Remarks: ''
-			}],
-			DiscountType: 'NotSet',
-			PassportIssueCountryCode: 'IN',
-			PassportIssueIsoCountryCode: 'IN',
-			PassportIssueCity: 'New Delhi',
-			HesCode: '',
-			PassportIssueDate: '2020-01-15T00:00:00Z',
-			GSTNumber: '22AAAAA0000A1Z5',
-			GSTContactNumber: '9876543210',
-			GSTName: 'ABC Travels',
-			GSTAddress: '456 Business Park',
-			GSTEmail: 'gst@abctravels.com',
-			PhoneDetails: [{
-				PhoneType: 'Mobile',
-				Number: '9876543210',
-				InternationalCode: '91',
-				AreaCode: '011',
-				Extension: ''
-			}],
-			AddressDetails: [{
-				AddressLine1: '123 MG Road',
-				AddressLine2: 'Sector 5',
-				PostalCode: '110001',
-				CellPhoneNumber: '9876543210',
-				CellCountryCode: '91',
-				EmailId: 'rahul.sharma@example.com',
-				ProvinceState: 'Delhi',
-				City: 'New Delhi'
-			}],
-			GSTCity: 'New Delhi',
-			GSTCountryName: 'India',
-			GSTPostalCode: '110001',
-			GSTCountryCode: 'IN',
-			GSTState: 'Delhi',
-			SegmentDetails: segDetails
-		};
+		const passengers = [];
+		let globalPassengerIndex = 0;
+		for (const fareRow of fareBreakdown) {
+			const count = Number(fareRow.PassengerCount ?? fareRow.passengerCount ?? 0);
+			if (count <= 0) continue;
+			for (let i = 0; i < count; i++) {
+				passengers.push(buildPassengerFromFareRow(fareRow, {
+					fare,
+					segments,
+					airlineCode,
+					firstApd,
+					firstSeg,
+					cancelPenalty,
+					isLeadPax: globalPassengerIndex === 0,
+					passengerIndex: globalPassengerIndex
+				}));
+				globalPassengerIndex += 1;
+			}
+		}
+
+		if (!passengers.length) {
+			throw new Error('No passengers found in FareBreakdown (missing or zero PassengerCount).');
+		}
 
 		const bookReq = {
 			ClientDetails: buildClientDetails(sessionId),
@@ -892,7 +948,7 @@ async function jsonFqRespToBookReqJson() {
 				Origin: firstSeg.Origin || '',
 				Destination: lastSeg.Destination || '',
 				PNR: '',
-				Passenger: [passenger],
+				Passenger: passengers,
 				IssuanceType: fare.IssuanceType || fare.issuanceType || 'ETicket',
 				SessionId: sessionId,
 				UniqueId: 'UNIQ-BK-' + String(generateRandomTimestamp()).slice(0, 3),
