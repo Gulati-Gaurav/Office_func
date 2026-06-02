@@ -607,8 +607,8 @@ function buildClientDetails(sessionId) {
 		UserIP: '192.168.1.100',
 		AgencyId: 'AGN001',
 		ClientAgencyType: 'B2B',
-		UserName: 'testuser',
-		Password: 'testpass'
+		UserName: 'tektravel',
+		Password: '12345'
 	};
 }
 
