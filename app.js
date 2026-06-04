@@ -370,26 +370,33 @@ function normalizeSearchJsonToResult(parsed) {
 	if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
 		throw new Error('JSON must be an object: either a search response with a Results array, or a single search result with fareBreakupDetails.');
 	}
-	if (Array.isArray(parsed.Results) && parsed.Results.length > 0) {
-		return parsed.Results[0];
+	const results = getResultsArray(parsed);
+	if (results && results.length > 0) {
+		return results[0];
 	}
 	const nested = parsed.searchResult ?? parsed.result ?? parsed.data;
 	if (nested && typeof nested === 'object' && !Array.isArray(nested)
-		&& Array.isArray(nested.fareBreakupDetails) && nested.fareBreakupDetails.length > 0) {
+		&& hasFareBreakupDetails(nested)) {
 		return nested;
 	}
-	if (Array.isArray(parsed.fareBreakupDetails) && parsed.fareBreakupDetails.length > 0) {
+	if (hasFareBreakupDetails(parsed)) {
 		return parsed;
 	}
 	throw new Error('JSON must include a non-empty Results array (full search response), or fareBreakupDetails on the root / searchResult / result / data object (single search result).');
 }
 
+function hasFareBreakupDetails(obj) {
+	const fbd = obj?.FareBreakupDetails || obj?.fareBreakupDetails;
+	return Array.isArray(fbd) && fbd.length > 0;
+}
+
 function searchJsonToFareQuoteXml(parsed) {
 	const result = normalizeSearchJsonToResult(parsed);
-	if (!result.fareBreakupDetails || !Array.isArray(result.fareBreakupDetails) || result.fareBreakupDetails.length === 0) {
+	const fbd = result.FareBreakupDetails || result.fareBreakupDetails;
+	if (!Array.isArray(fbd) || fbd.length === 0) {
 		throw new Error('Search result must have a non-empty fareBreakupDetails array.');
 	}
-	const pricing = result.fareBreakupDetails[0];
+	const pricing = fbd[0];
 	const airPd = pricing.airProductDetails || [];
 	const fares = pricing.fareBreakdown || [];
 	const flights2d = result.flights || [];
