@@ -370,33 +370,26 @@ function normalizeSearchJsonToResult(parsed) {
 	if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
 		throw new Error('JSON must be an object: either a search response with a Results array, or a single search result with fareBreakupDetails.');
 	}
-	const results = getResultsArray(parsed);
-	if (results && results.length > 0) {
-		return results[0];
+	if (Array.isArray(parsed.Results) && parsed.Results.length > 0) {
+		return parsed.Results[0];
 	}
 	const nested = parsed.searchResult ?? parsed.result ?? parsed.data;
 	if (nested && typeof nested === 'object' && !Array.isArray(nested)
-		&& hasFareBreakupDetails(nested)) {
+		&& Array.isArray(nested.fareBreakupDetails) && nested.fareBreakupDetails.length > 0) {
 		return nested;
 	}
-	if (hasFareBreakupDetails(parsed)) {
+	if (Array.isArray(parsed.fareBreakupDetails) && parsed.fareBreakupDetails.length > 0) {
 		return parsed;
 	}
 	throw new Error('JSON must include a non-empty Results array (full search response), or fareBreakupDetails on the root / searchResult / result / data object (single search result).');
 }
 
-function hasFareBreakupDetails(obj) {
-	const fbd = obj?.FareBreakupDetails || obj?.fareBreakupDetails;
-	return Array.isArray(fbd) && fbd.length > 0;
-}
-
 function searchJsonToFareQuoteXml(parsed) {
 	const result = normalizeSearchJsonToResult(parsed);
-	const fbd = result.FareBreakupDetails || result.fareBreakupDetails;
-	if (!Array.isArray(fbd) || fbd.length === 0) {
+	if (!result.fareBreakupDetails || !Array.isArray(result.fareBreakupDetails) || result.fareBreakupDetails.length === 0) {
 		throw new Error('Search result must have a non-empty fareBreakupDetails array.');
 	}
-	const pricing = fbd[0];
+	const pricing = result.fareBreakupDetails[0];
 	const airPd = pricing.airProductDetails || [];
 	const fares = pricing.fareBreakdown || [];
 	const flights2d = result.flights || [];
@@ -688,6 +681,22 @@ function dateOfBirthForPassengerType(passengerType) {
 	return '1990-05-15T00:00:00Z';
 }
 
+const SAMPLE_PASSENGER_NAMES = [
+	{ firstName: 'Raju', lastName: 'Kumar', title: 'Mr', gender: 1 },
+	{ firstName: 'Darpan', lastName: 'Gupta', title: 'Mr', gender: 1 },
+	{ firstName: 'Pankaj', lastName: 'Kumar', title: 'Mr', gender: 1 },
+	{ firstName: 'Ayush', lastName: 'Jain', title: 'Mr', gender: 1 },
+	{ firstName: 'Vishal', lastName: 'Dua', title: 'Mr', gender: 1 },
+	{ firstName: 'Mahendra Singh', lastName: 'Dhoni', title: 'Mr', gender: 1 },
+	{ firstName: 'Rajesh', lastName: 'Kumar', title: 'Mr', gender: 1 },
+	{ firstName: 'Manisha', lastName: 'Gupta', title: 'Ms', gender: 2 },
+	{ firstName: 'Virat', lastName: 'Kohli', title: 'Mr', gender: 1 },
+];
+
+function passengerNameForIndex(passengerIndex) {
+	return SAMPLE_PASSENGER_NAMES[passengerIndex % SAMPLE_PASSENGER_NAMES.length];
+}
+
 function mapSegmentDetailsForFare(fareRow, firstApd, firstSeg) {
 	const rawSegmentDetails = fareRow.SegmentDetails || fareRow.segmentDetails || [];
 	return rawSegmentDetails.map(sd => ({
@@ -724,11 +733,12 @@ function buildPassengerFromFareRow(fareRow, options) {
 	}));
 	const paxId = String(passengerIndex + 1).padStart(3, '0');
 	const passengerType = fareRow.PassengerType || fareRow.passengerType || 'Adult';
+	const nameInfo = passengerNameForIndex(passengerIndex);
 
 	return {
-		FirstName: `Pax${paxId}`,
-		LastName: 'Sharma',
-		Title: 'Mr',
+		FirstName: nameInfo.firstName,
+		LastName: nameInfo.lastName,
+		Title: nameInfo.title,
 		CellCountryCode: '91',
 		CellPhone: '9876543210',
 		IsLeadPax: isLeadPax,
@@ -739,7 +749,7 @@ function buildPassengerFromFareRow(fareRow, options) {
 		City: 'New Delhi',
 		AddressLine1: '123 MG Road',
 		AddressLine2: 'Sector 5',
-		Gender: 1,
+		Gender: nameInfo.gender,
 		Email: 'rahul.sharma@example.com',
 		Meal: { Code: 'VGML', Description: 'Vegetarian Meal' },
 		PaxPreference: { Code: 'WHEELCHAIR', Description: 'Wheelchair required' },
