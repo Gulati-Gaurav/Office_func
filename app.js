@@ -667,10 +667,74 @@ async function jsonSearchToFqReqJson() {
 
 function passengerTypeToBookType(passengerType) {
 	const normalizedType = String(passengerType || '').trim().toLowerCase();
-	if (normalizedType === 'child') return 2;
-	if (normalizedType === 'infant') return 3;
-	if (normalizedType === 'senior') return 4;
+	if (normalizedType === 'child' || normalizedType === 'chd') return 2;
+	if (normalizedType === 'infant' || normalizedType === 'inf') return 3;
+	if (normalizedType === 'senior' || normalizedType === 'src') return 4;
 	return 1;
+}
+
+function resolveBookPassengerType(fareRow) {
+	const raw = fareRow.PassengerType ?? fareRow.passengerType ?? fareRow.Type ?? fareRow.type;
+	if (raw == null || raw === '') return 1;
+	if (typeof raw === 'number' && !Number.isNaN(raw)) return raw;
+	const asNumber = Number(raw);
+	if (!Number.isNaN(asNumber) && String(raw).trim() === String(asNumber)) return asNumber;
+	return passengerTypeToBookType(raw);
+}
+
+function resolvePassengerTypeLabel(fareRow) {
+	const raw = fareRow.PassengerType ?? fareRow.passengerType ?? fareRow.Type ?? fareRow.type;
+	if (raw == null || raw === '') return 'Adult';
+	if (typeof raw === 'number' || (!Number.isNaN(Number(raw)) && String(raw).trim() === String(Number(raw)))) {
+		const typeByNumber = { 1: 'Adult', 2: 'Child', 3: 'Infant', 4: 'Senior' };
+		return typeByNumber[Number(raw)] || 'Adult';
+	}
+	return String(raw);
+}
+
+function extractFareBreakdownRows(source) {
+	if (!source || typeof source !== 'object') return [];
+
+	const candidates = [
+		source.FareBreakdown,
+		source.fareBreakdown,
+		source.FareBreakupDetails?.[0]?.FareBreakdown,
+		source.FareBreakupDetails?.[0]?.fareBreakdown,
+		source.fareBreakupDetails?.[0]?.FareBreakdown,
+		source.fareBreakupDetails?.[0]?.fareBreakdown
+	];
+
+	for (const candidate of candidates) {
+		if (!candidate) continue;
+
+		if (Array.isArray(candidate)) {
+			if (candidate.length === 0) continue;
+			const first = candidate[0];
+			const looksLikeFareRow = first && (
+				first.PassengerType != null || first.passengerType != null
+				|| first.Type != null || first.type != null
+				|| first.PassengerCount != null || first.passengerCount != null
+				|| first.BaseFare != null || first.baseFare != null
+			);
+			if (looksLikeFareRow) return candidate;
+
+			const nestedFares = candidate.flatMap((item) => {
+				if (!item || typeof item !== 'object') return [];
+				const fares = item.Fare ?? item.fare;
+				return Array.isArray(fares) ? fares : (fares ? [fares] : []);
+			});
+			if (nestedFares.length) return nestedFares;
+			continue;
+		}
+
+		if (typeof candidate === 'object') {
+			const fares = candidate.Fare ?? candidate.fare;
+			if (Array.isArray(fares)) return fares;
+			if (fares && typeof fares === 'object') return [fares];
+		}
+	}
+
+	return [];
 }
 
 function dateOfBirthForPassengerType(passengerType) {
@@ -726,13 +790,13 @@ function buildPassengerFromFareRow(fareRow, options) {
 	const yqTax = Number(fareRow.YQTax || fareRow.yqTax || 0);
 	const perPaxBase = baseFare / paxCount;
 	const perPaxTax = taxTotal / paxCount;
-	const publishedFare = perPaxBase + perPaxTax;
+	const publishedFare = perPaxBase;
 	const taxList = (fareRow.TaxList || fareRow.taxList || []).map(t => ({
 		Amount: Number(t.Amount || t.amount || 0),
 		TaxType: t.TaxType || t.taxType || ''
 	}));
 	const paxId = String(passengerIndex + 1).padStart(3, '0');
-	const passengerType = fareRow.PassengerType || fareRow.passengerType || 'Adult';
+	const passengerType = resolvePassengerTypeLabel(fareRow);
 	const nameInfo = passengerNameForIndex(passengerIndex);
 
 	return {
@@ -743,7 +807,7 @@ function buildPassengerFromFareRow(fareRow, options) {
 		CellPhone: '9876543210',
 		IsLeadPax: isLeadPax,
 		DateOfBirth: dateOfBirthForPassengerType(passengerType),
-		Type: passengerTypeToBookType(passengerType),
+		Type: resolveBookPassengerType(fareRow),
 		PassportNo: 'A1234567',
 		Nationality: 'IN',
 		City: 'New Delhi',
@@ -867,7 +931,11 @@ async function jsonFqRespToBookReqJson() {
 		if (!fbd.length) throw new Error('No FareBreakupDetails found in SearchResult.');
 		const fare = fbd[0];
 
-		const fareBreakdown = fare.FareBreakdown || fare.fareBreakdown || [];
+		let fareBreakdown = extractFareBreakdownRows(sr);
+		if (!fareBreakdown.length) fareBreakdown = extractFareBreakdownRows(fare);
+		if (!fareBreakdown.length) {
+			throw new Error('No FareBreakdown found in SearchResult.');
+		}
 
 		const flights = sr.Flights || sr.flights || [];
 		const firstJourney = flights[0] || [];
